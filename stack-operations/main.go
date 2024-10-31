@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
 type stack []string
 
@@ -32,54 +35,60 @@ func (s *stack) pop() (string, bool) {
 	return top, true
 }
 
+// compareRunes compares two strings based on the first rune.
+func compareRunes(a, b string) bool {
+	runeA, _ := utf8.DecodeRuneInString(a)
+	runeB, _ := utf8.DecodeRuneInString(b)
+	return runeA < runeB
+}
+
+func sortStack(stack1, stack2 *stack) {
+	for !stack1.isEmpty() {
+		value, _ := stack1.pop()
+		for !stack2.isEmpty() && !compareRunes(value, (*stack2)[len(*stack2)-1]) {
+			temp, _ := stack2.pop()
+			stack1.push(temp)
+		}
+		stack2.push(value)
+	}
+
+	for !stack2.isEmpty() {
+		value, _ := stack2.pop()
+		stack1.push(value)
+	}
+}
+
 func main() {
 	var s stack
-	capacity := 3
+	capacity := 5
 
-	// Test if the stack is empty
-	fmt.Println("Is the stack empty?", s.isEmpty()) // Should print true
+	fmt.Println("Is the stack empty?", s.isEmpty())
 
-	// Push elements onto the stack
-	s.push("hello")
-	s.push("world")
-	s.push("hi!!!!!")
+	s.push("banana")
+	s.push("apple")
+	s.push("cherry")
+	s.push("date")
+	s.push("elderberry")
+
 	fmt.Println("Stack after pushes:", s)
 
-	// Check if the stack is full
-	fmt.Println("Is the stack full?", s.isFull(capacity)) // Should print true
+	fmt.Println("Is the stack full?", s.isFull(capacity))
 
-	// Peek at the top element
 	if top, ok := s.peek(); ok {
-		fmt.Println("Top element:", top) // "
+		fmt.Println("Top element:", top)
 	} else {
 		fmt.Println("Stack is empty")
 	}
 
-	// Pop the top element and print it
+	sortStack(&s, &stack{})
+
+	fmt.Println("Sorted stack:", s)
+
 	if val, ok := s.pop(); ok {
-		fmt.Println("Popped value:", val) // Should print "mambo"
+		fmt.Println("Popped value:", val)
 	} else {
 		fmt.Println("Stack is empty")
 	}
 
-	// Print remaining elements in the stack
-	fmt.Println("Stack after pop:", s) // Should print [hello world]
-
-	// Pop again and print the remaining stack
-	if val, ok := s.pop(); ok {
-		fmt.Println("Popped value:", val) // Should print "world"
-	} else {
-		fmt.Println("Stack is empty")
-	}
-	fmt.Println("Stack after another pop:", s) // Should print [hello]
-
-	// Pop the last element
-	if val, ok := s.pop(); ok {
-		fmt.Println("Popped value:", val) // Should print "hello"
-	} else {
-		fmt.Println("Stack is empty")
-	}
-
-	// Check if the stack is empty after popping all elements
-	fmt.Println("Is the stack empty after popping all?", s.isEmpty()) // Should print true
+	fmt.Println("Stack after pop:", s)
 }
